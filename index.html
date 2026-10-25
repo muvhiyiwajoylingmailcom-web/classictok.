@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClassicTok — Learn While You Scroll</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 18px;
+      display: flex;
+      justify-content: space-between;
+      background: #000;
+      border-bottom: 1px solid #333;
+      z-index: 10;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .tabs {
+      color: #aaa;
+    }
+
+    .tabs span:first-child {
+      color: white;
+      border-bottom: 2px solid white;
+      padding-bottom: 5px;
+    }
+
+    main {
+      padding-top: 65px;
+      padding-bottom: 65px;
+      max-width: 500px;
+      margin: auto;
+    }
+
+    .lesson {
+      min-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 24px;
+      border-bottom: 1px solid #333;
+      position: relative;
+    }
+
+    .visual {
+      min-height: 300px;
+      border-radius: 20px;
+      background: linear-gradient(145deg, #222, #080808);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 25px;
+    }
+
+    .emoji {
+      font-size: 75px;
+      margin-bottom: 20px;
+    }
+
+    .visual h2 {
+      font-size: 28px;
+    }
+
+    .description {
+      color: #ccc;
+      line-height: 1.6;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    button {
+      background: #fff;
+      color: #000;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button.secondary {
+      background: #222;
+      color: white;
+      border: 1px solid #555;
+    }
+
+    .feedback {
+      margin-top: 12px;
+      color: #ddd;
+    }
+
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #080808;
+      border-top: 1px solid #333;
+      display: flex;
+      justify-content: space-around;
+      padding: 15px 5px;
+      z-index: 10;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+    @media (min-width: 700px) {
+      .lesson {
+        min-height: 90vh;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo">ClassicTok.</div>
+    <div class="tabs"><span>For You</span> &nbsp; Following</div>
+  </header>
+
+  <main id="feed"></main>
+
+  <nav>
+    <a href="#home">⌂ Home</a>
+    <a href="#discover">⌕ Discover</a>
+    <a href="#create">＋ Create</a>
+    <a href="#study">▣ Study</a>
+    <a href="#profile">◉ Profile</a>
+  </nav>
+
+  <script>
+    const lessons = [
+      {
+        subject: "SCIENCE",
+        title: "Why does ice float?",
+        emoji: "🧊",
+        creator: "@ScienceWithSam",
+        description:
+          "Ice is less dense than liquid water. When water freezes, its molecules form a structure that takes up more space.",
+        question: "Why does ice float in water?",
+        answers: [
+          "Ice is less dense than water",
+          "Ice is heavier than water",
+          "Ice contains air in every case"
+        ],
+        correct: 0
+      },
+      {
+        subject: "MATHEMATICS",
+        title: "Calculate 15% quickly",
+        emoji: "🔢",
+        creator: "@MathsMadeEasy",
+        description:
+          "Find 10% by dividing by 10. Find 5% by halving your 10% answer. Add them together to get 15%.",
+        question: "What is 15% of 200?",
+        answers: ["15", "30", "45"],
+        correct: 1
+      },
+      {
+        subject: "BIOLOGY",
+        title: "Your heart never takes a day off",
+        emoji: "❤️",
+        creator: "@BioInSeconds",
+        description:
+          "Your heart is a muscular pump. It contracts to move blood through your lungs and around your body.",
+        question: "What is the heart's main job?",
+        answers: [
+          "Digest food",
+          "Pump blood",
+          "Produce oxygen"
+        ],
+        correct: 1
+      }
+    ];
+
+    const feed = document.getElementById("feed");
+    const saved = new Set();
+    const liked = new Set();
+
+    lessons.forEach((lesson, index) => {
+      const card = document.createElement("section");
+      card.className = "lesson";
+
+      card.innerHTML = `
+        <div class="visual">
+          <div class="emoji">${lesson.emoji}</div>
+          <small>${lesson.subject} · QUICK LESSON</small>
+          <h2>${lesson.title}</h2>
+        </div>
+
+        <p><strong>${lesson.creator}</strong></p>
+        <p class="description">${lesson.description}</p>
+
+        <div class="actions">
+          <button class="like secondary">♡ Like</button>
+          <button class="save secondary">☆ Save</button>
+          <button class="quiz">🧠 Quiz</button>
+        </div>
+
+        <div class="feedback" aria-live="polite"></div>
+      `;
+
+      card.querySelector(".like").onclick = event => {
+        const button = event.currentTarget;
+        const isLiked = liked.has(index);
+
+        if (isLiked) {
+          liked.delete(index);
+          button.textContent = "♡ Like";
+        } else {
+          liked.add(index);
+          button.textContent = "♥ Liked";
+        }
+      };
+
+      card.querySelector(".save").onclick = event => {
+        const button = event.currentTarget;
+
+        if (saved.has(index)) {
+          saved.delete(index);
+          button.textContent = "☆ Save";
+        } else {
+          saved.add(index);
+          button.textContent = "★ Saved";
+        }
+      };
+
+      card.querySelector(".quiz").onclick = () => {
+        const feedback = card.querySelector(".feedback");
+
+        feedback.innerHTML = `
+          <p><strong>${lesson.question}</strong></p>
+          ${lesson.answers.map((answer, answerIndex) => 
+            `<button class="secondary answer" data-answer="${answerIndex}">
+              ${answer}
+            </button>`
+          ).join("<br><br>")}
+        `;
+
+        feedback.querySelectorAll(".answer").forEach(button => {
+          button.onclick = () => {
+            const correct =
+              Number(button.dataset.answer) === lesson.correct;
+
+            feedback.innerHTML = correct
+              ? "✅ Correct! Great work."
+              : "💡 Not quite. Read the lesson and try again!";
+          };
+        });
+      };
+
+      feed.appendChild(card);
+    });
+  </script>
+</body>
+</html>
